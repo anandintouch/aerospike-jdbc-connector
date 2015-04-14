@@ -3,19 +3,22 @@
 Overview:
 JDBC-compliant driver for Aerospike using AQL. It's JDBC driver to perform CRUD operation in Aerospike.
 
-Build instructions
+Build instructions:
 
-Clone the GitHub repository at https://github.com/anandintouch/aerospike-jdbc-connector.git
+Clone the GitHub repository to your local file system with :
 
-Execute the command:
+ git clone https://github.com/anandintouch/aerospike-jdbc-connector.git
 
-mvn clean package
-A runnable Jar will be produced in the target subdirectory, run this with the following command:
+Execute the following command from the rood directory of the project:
+
+ mvn clean package
+
+A runnable Jar will be produced in the target subdirectory which includes all the dependencies packaged.
 
 Example to Run:
 * Write your JDBC application.
 * Add the Aerospike JDBC Connector jar file 
-  (aerospike-jdbc-connector-1.0.0-SNAPSHOT-jar-with-  dependencies) in the build path
+  (aerospike-jdbc-connector-1.0.0-SNAPSHOT-jar-with-dependencies.jar) in the build path
 * Create a database connection object using DriverManager by providing DB URL as below -
    String DB_URL = jdbc:aerospike://localhost:3000/test
    java.sql.Connection con = DriverManager.getConnection(DB_URL);
