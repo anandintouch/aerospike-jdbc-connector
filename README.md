@@ -41,6 +41,7 @@ Sample application Example:
 	}
 
 - Method samples as below
+
 1.
  	public void testDBCOnnection(){
 		try {
@@ -93,6 +94,7 @@ Sample application Example:
        System.out.println("Record Retrieved !!");
        System.out.println(String.format("Result from DB is: "+ myObj.toString())+"\n");
    }
+
 4.
    public void testDelete() throws Exception
    {
