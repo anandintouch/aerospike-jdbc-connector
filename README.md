@@ -1,10 +1,11 @@
-JDBC Driver for Aerospike NOSQL Database.
+#JDBC Driver for Aerospike NOSQL Database.
+
 Overview:
 JDBC-compliant driver for Aerospike using AQL. It's JDBC driver to perform CRUD operation in Aerospike.
 
 Build instructions
 
-Clone the GitHub repository at https://github.com/helipilot50/aerospike-travel-aggregation.git
+Clone the GitHub repository at https://github.com/anandintouch/aerospike-jdbc-connector.git
 
 Execute the command:
 
