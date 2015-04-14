@@ -79,10 +79,11 @@ public class ReadWriteTest
         Statement statement = con.createStatement();
 
         ResultSet result = statement.executeQuery("select * from mytable where name='anand'");
-        
-        Object myObj = result.getObject("name");
         assertNotNull(result);
+        
+        Object myObj = result.toString();//result.getObject("name");
         System.out.println(String.format("Result from DB is: '%s'\n", myObj.toString()));
+        statement.close();
 
     }
     

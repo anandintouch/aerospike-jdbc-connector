@@ -43,14 +43,14 @@
    	 <version>0.9</version>
 	</dependency>
   	<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr</artifactId>
-			<version>3.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.antlr</groupId>
-			<artifactId>antlr3-maven-plugin</artifactId>
-			<version>3.5.1</version>
+		<groupId>org.antlr</groupId>
+		<artifactId>antlr</artifactId>
+		<version>3.4</version>
+	</dependency>
+	<dependency>
+		<groupId>org.antlr</groupId>
+		<artifactId>antlr3-maven-plugin</artifactId>
+		<version>3.5.1</version>
 		</dependency>
   	<dependency>
       <groupId>org.slf4j</groupId>
