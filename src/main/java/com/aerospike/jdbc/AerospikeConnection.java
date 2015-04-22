@@ -426,12 +426,17 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
 			
 			if( pSelect.getWhere() != null){
 				String whereVal = pSelect.getWhere().toString();
-				String[] whereArray = whereVal.replace("'", "").split("=");
-				statement.setFilters(Filter.equal(whereArray[0].trim(),whereArray[1].trim()));
+				String[] whereArray = whereVal.split("=");
 				
 				//create index since where clause is there
-				createIndex(pSelect,whereArray);
-				
+				if(whereArray[1].trim().startsWith("'")){
+					createIndex(pSelect,whereArray,"STRING");
+					statement.setFilters(Filter.equal(whereArray[0].trim(),whereArray[1].replace("'", "").trim()));
+				}else{
+					createIndex(pSelect,whereArray,"NUMERIC");
+					statement.setFilters(Filter.equal(whereArray[0].trim(),whereArray[1].trim()));
+				}
+	
 			}
 			record = client.query(new QueryPolicy(), statement);
 			
@@ -456,10 +461,19 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
     
     /**
      * Create index
+     * 
      * @param whereArray 
+     * @param indexType 
      */
-    private void createIndex(PlainSelect plainSelect, String[] whereArray){
-    	IndexTask indexTask = client.createIndex(null, currNamespace, plainSelect.getFromItem().toString(), "indx_"+whereArray[0].trim(), whereArray[0].trim(), IndexType.STRING);
+    private void createIndex(PlainSelect plainSelect, String[] whereArray, String indexType){
+    	String indexName = "index_"+whereArray[0].trim();
+    	IndexTask indexTask = null;
+    	if(indexType.equals(IndexType.STRING)){
+    		 indexTask = client.createIndex(null, currNamespace, plainSelect.getFromItem().toString(), indexName, whereArray[0].trim(), IndexType.STRING);
+    	}else {
+    		 indexTask = client.createIndex(null, currNamespace, plainSelect.getFromItem().toString(), indexName, whereArray[0].trim(), IndexType.NUMERIC);
+    	}
+    	
 		indexTask.waitTillComplete();
     }
     

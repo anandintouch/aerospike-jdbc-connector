@@ -19,6 +19,8 @@ import junit.framework.TestSuite;
 
 /**
  * Unit test for simple App.
+ * 
+ * @author anand prakash
  */
 public class ReadWriteTest 
 {
@@ -63,8 +65,7 @@ public class ReadWriteTest
     @Test
     public void testInsert() throws Exception
     {
-    	 String insert = "INSERT INTO mytable (PK,name,city) VALUES('1','anand','fremont')";
-    	// String insert = "INSERT INTO test.demo(PK, bn2, bn3, bn4) VALUES ('3', 3, '2', 2)";
+    	 String insert = "INSERT INTO myset (PK,name,city) VALUES('1','AP','San Jose')";
          Statement statement = con.createStatement();
 
          statement.executeUpdate(insert);
@@ -78,7 +79,7 @@ public class ReadWriteTest
 
         Statement statement = con.createStatement();
 
-        ResultSet result = statement.executeQuery("select * from mytable where name='anand'");
+        ResultSet result = statement.executeQuery("select * from myset where name='AP'");
         assertNotNull(result);
         
         Object myObj = result.toString();//result.getObject("name");
@@ -93,7 +94,7 @@ public class ReadWriteTest
 
         Statement statement = con.createStatement();
 
-        ResultSet result = statement.executeQuery("select city from mytable");
+        ResultSet result = statement.executeQuery("select city from myset");
         
         Object myObj = result.getObject("city");
         assertNotNull(result);
@@ -114,7 +115,7 @@ public class ReadWriteTest
     {
 
         Statement statement = con.createStatement();
-        String delete = "Delete from mytable where PK='1'";
+        String delete = "Delete from myset where PK='1'";
         boolean result = statement.execute(delete);
         
         System.out.println(String.format("Record deleted-"+result));
