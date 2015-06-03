@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -28,9 +29,11 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.aerospike.client.Record;
 import com.aerospike.client.query.RecordSet;
@@ -47,15 +50,19 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
     public static final int DEFAULT_TYPE = ResultSet.TYPE_FORWARD_ONLY;
     
     private Record rowsIterator;
+    private RecordSet recordSet;
     private final AerospikeStatement statement;
     private int resultSetType;
     private int fetchDirection;
     private int fetchSize;
+    private Map<String, Object> indexMap = new HashMap<String, Object>();
+    int rowNumber = 0;
     
     
     private final ASResultSetMetaData metaData;
     
-    private List<TypedBin> values = new ArrayList<TypedBin>();
+    //private List<TypedBin> values = new ArrayList<TypedBin>();
+    private List<Record> values = new ArrayList<Record>();
 
     AerospikeResultSet()
     {
@@ -72,19 +79,32 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
         //this.schema = resultSet.schema;
 
         // Initialize meta-data from schema
-       // populateMetaData();
+         populateMetaData(resultSet);
 
         //rowsIterator = resultSet.getRecord();//getRowsIterator();
 
-        // Initialize to column values from the first row
-        // re-Initialize meta-data to column values from the first row (if data exists)
-        // NOTE: that the first call to next() will HARMLESSLY re-write these values for the columns
-        // NOTE: the row cursor is not advanced and sits before the first row
         if (resultSet != null && resultSet.next())
         {
            // populateColumns();
             // reset the iterator back to the beginning.
+        	recordSet = resultSet;
             rowsIterator = resultSet.getRecord();
+        }
+
+        metaData = new ASResultSetMetaData();
+    }
+    
+    AerospikeResultSet(AerospikeStatement statement, Map<String, Object> resultSet) throws SQLException
+    {
+        this.statement = statement;
+        this.resultSetType = statement.getResultSetType();
+        this.fetchDirection = statement.getFetchDirection();
+        this.fetchSize = statement.getFetchSize();
+ 
+        if (resultSet != null )
+        {
+            // reset the iterator back to the beginning.
+            rowsIterator =  new Record(resultSet, fetchDirection, fetchDirection);
         }
 
         metaData = new ASResultSetMetaData();
@@ -102,9 +122,49 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
 	}
 
 	public boolean next() throws SQLException {
-		// TODO Auto-generated method stub
-		return false;
+        if (hasMoreRows())
+        {
+           /* if (rowNumber != 0) populateColumns();
+            else rowsIterator.next();*/
+        	recordSet.next();
+          // populateBins();
+            rowNumber++;
+            return true;
+        }
+        else
+        {
+            rowNumber = Integer.MAX_VALUE;
+            return false;
+        }
+		
 	}
+	
+    private final void populateMetaData(RecordSet resultSet)
+    {
+        values.clear();
+        indexMap.clear();
+        while (resultSet.next()) {
+        	if(resultSet.getRecord().bins != null){
+        		/*for(Map.Entry<String, Object> entry : resultSet.getRecord().bins.entrySet()){
+        			//values.add(new TypedBin(entry.getKey(),entry.getValue()));
+        			values.add(resultSet.getRecord());
+        			System.out.println("Name-"+entry.getKey()+" Value-"+entry.getValue());
+        			
+        		}*/
+        		values.add(resultSet.getRecord());
+
+        	}
+        }
+
+    }
+	
+    private final boolean hasMoreRows()
+    {
+       // return (rowsIterator != null && rowsIterator.next());
+    	System.out.println("inside has more rows");
+        return (recordSet != null && recordSet.next());
+        
+    }
 
 	public void close() throws SQLException {
 		// TODO Auto-generated method stub
@@ -299,7 +359,8 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
 	}
 
 	public Object getObject(int columnIndex) throws SQLException {
-		// TODO Auto-generated method stub
+		/*checkIndex(columnIndex);
+        return getObject(values.get(columnIndex - 1));*/
 		return null;
 	}
 
@@ -1126,8 +1187,8 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
 		}
 
 		public int getColumnCount() throws SQLException {
-			// TODO Auto-generated method stub
-			return 0;
+			//System.out.println("Total column/record count is:"+values.size());
+			return values.size();
 		}
 
 		public boolean isAutoIncrement(int column) throws SQLException {
@@ -1166,15 +1227,21 @@ public class AerospikeResultSet extends AbstractResultSet implements ResultSet{
 		}
 
 		public String getColumnLabel(int column) throws SQLException {
-			// TODO Auto-generated method stub
-			return null;
+			checkIndex(column);
+            return getColumnName(column);
 		}
 
 		public String getColumnName(int column) throws SQLException {
 			checkIndex(column);
-            return values.get(column - 1).getNameString();
+            //return values.get(column - 1).getBinValue().toString();
+            return values.get(column - 1).toString();
 		}
 
+		public String getColumnValue(int column) throws SQLException {
+			checkIndex(column);
+			//return values.get(column - 1).getBinValue().toString();
+			return values.get(column - 1).toString();
+		}
 		public String getSchemaName(int column) throws SQLException {
 			// TODO Auto-generated method stub
 			return null;

@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,9 @@ import com.aerospike.aql.grammar.AQL;
 import com.aerospike.client.AerospikeClient;
 import com.aerospike.client.AerospikeException;
 import com.aerospike.client.Bin;
+import com.aerospike.client.Info;
 import com.aerospike.client.Key;
+import com.aerospike.client.cluster.Node;
 import com.aerospike.client.policy.QueryPolicy;
 import com.aerospike.client.policy.RecordExistsAction;
 import com.aerospike.client.policy.WritePolicy;
@@ -54,6 +57,7 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
 	public static final String DEFAULT_AQL_VERSION = "3.1.0";
     private Set<Statement> statements = new ConcurrentSkipListSet<Statement>();
     private WritePolicy writePolicy;
+    private static Map<String,Object> nodeStatusMap = new HashMap<String,Object>();
     
     CCJSqlParserManager parserManager = new CCJSqlParserManager();
     
@@ -94,7 +98,8 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
             
             this.client = new AerospikeClient(host,port);
             
-            clusterNode = client.getNodeNames().get(0);//describe_cluster_name();
+            if(!client.getNodeNames().isEmpty() && client.getNodeNames() != null)
+            	clusterNode = client.getNodeNames().get(0);//describe_cluster_name();
 /*
             if (username != null)
             {
@@ -466,9 +471,9 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
      * @param indexType 
      */
     private void createIndex(PlainSelect plainSelect, String[] whereArray, String indexType){
-    	String indexName = "index_"+whereArray[0].trim();
+    	String indexName = "index_"+plainSelect.getFromItem().toString()+"_"+whereArray[0].trim();
     	IndexTask indexTask = null;
-    	if(indexType.equals(IndexType.STRING)){
+    	if(indexType.equals(IndexType.STRING.name())){
     		 indexTask = client.createIndex(null, currNamespace, plainSelect.getFromItem().toString(), indexName, whereArray[0].trim(), IndexType.STRING);
     	}else {
     		 indexTask = client.createIndex(null, currNamespace, plainSelect.getFromItem().toString(), indexName, whereArray[0].trim(), IndexType.NUMERIC);
@@ -660,6 +665,56 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
 			e.printStackTrace();
 		}
 		return false;
+		
+	}
+	
+	protected Map<String, Object> executeInfo(String aql) throws AerospikeException {
+		Node[] clusterNodes = getAllNodesInCluster();
+		Map<String, List<String>> setList = null;
+		
+		try {
+			String command = aql.substring(aql.indexOf("-v")+2).trim();
+			
+			for(Node node : clusterNodes ){
+				//System.out.println("Node is:"+node.getAddress().getHostString());
+				setList = getSetList(Info.request(node,command));
+				nodeStatusMap.put(node.getAddress().getHostString(), (Object) setList);
+			}
+			
+		} catch (AerospikeException e) {
+
+			e.printStackTrace();
+		}
+		
+		return nodeStatusMap;
+	}
+	
+	private Node[] getAllNodesInCluster(){
+		return client.getNodes();
+	}
+	
+	private Map<String, List<String>> getSetList(String infoString){
+		Map<String,List<String>> dbCatalog = new HashMap<String, List<String>>();
+		List<String> setList = new ArrayList<String>();
+		String nameSpace = null;
+		
+		for (String token : infoString.split(";")) { 
+			if(token.contains("set_name") && token.contains("ns_name")){
+				for (String setToken : token.split(":")) {
+					if(setToken.contains("ns_name"))
+						nameSpace = setToken.split("=")[1];
+					if(setToken.contains("set_name") ){
+						setList.add(Arrays.asList(setToken.split("=")).get(1));
+						break;
+					}
+					
+				}
+				//setList.add(Arrays.asList(setName.split("=")).get(1));
+			}
+		}
+		dbCatalog.put(nameSpace,setList);
+		
+		return dbCatalog;
 		
 	}
 

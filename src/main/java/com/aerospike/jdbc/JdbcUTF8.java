@@ -70,18 +70,6 @@ public class JdbcUTF8 extends AbstractJdbcType<String>
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	/*    public String getString(ByteBuffer bytes)
-    {
-        try
-        {
-            return ByteBufferUtil.string(bytes);
-        }
-        catch (CharacterCodingException e)
-        {
-            throw new MarshalException("invalid UTF8 bytes " + ByteBufferUtil.bytesToHex(bytes));
-        }
-    }*/
 
 	@Override
 	public ByteBuffer decompose(String obj) {
@@ -89,8 +77,4 @@ public class JdbcUTF8 extends AbstractJdbcType<String>
 		return null;
 	}
 
-    /*public ByteBuffer decompose(String value)
-    {
-        return ByteBufferUtil.bytes(value, UTF_8);
-    }*/
 }

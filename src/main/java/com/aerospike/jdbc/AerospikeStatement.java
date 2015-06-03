@@ -7,6 +7,7 @@ import static com.aerospike.jdbc.Utility.BAD_TYPE_RESULTSET;
 import static com.aerospike.jdbc.Utility.CLOSED_STMT;
 import static com.aerospike.jdbc.Utility.NO_RESULTSET;
 import static com.aerospike.jdbc.Utility.NO_UPDATE_COUNT;
+import static com.aerospike.jdbc.Utility.NO_INFORESULT;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -16,6 +17,7 @@ import java.sql.SQLRecoverableException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.regex.Matcher;
 
 import com.aerospike.client.AerospikeClient;
@@ -37,7 +39,7 @@ public class AerospikeStatement extends AbstractStatement implements Statement,C
 	protected int fetchSize = 0;
 	boolean deleteStatus = false;
 	
-	public enum QueryType {SELECT,INSERT,DELETE,UPDATE};
+	public enum QueryType {SELECT,INSERT,DELETE,UPDATE,ASINFO};
 	 
 	AerospikeStatement(AerospikeConnection conn) throws SQLException
     {
@@ -95,7 +97,7 @@ public class AerospikeStatement extends AbstractStatement implements Statement,C
         updateCount = -1;
         deleteStatus = false;
     }
-    
+
     private void doExecute(String aql) throws SQLException
     {
         try
@@ -115,6 +117,9 @@ public class AerospikeStatement extends AbstractStatement implements Statement,C
             	connection.executeInsertUpdate(aql);
             } else if (queryType.equalsIgnoreCase(QueryType.DELETE.toString())){
             	 deleteStatus = connection.executeDelete(aql);
+            } else{
+            	Map<String, Object> infoResultSet = connection.executeInfo(aql);
+            	currentResultSet = new AerospikeResultSet(this, infoResultSet);
             }
             
             /*
@@ -152,10 +157,10 @@ public class AerospikeStatement extends AbstractStatement implements Statement,C
 	}
 	
 	private String getFirstWord(String querySTring) {
-	    if (querySTring.indexOf(' ') > -1) { // Check if there is more than one word.
-	    	return querySTring.substring(0, querySTring.indexOf(' ')); // Extract first word.
+	    if (querySTring.trim().indexOf(' ') > -1) { // Check if there is more than one word.
+	    	return querySTring.trim().substring(0, querySTring.trim().indexOf(' ')); // Extract first word.
 	    } else {
-	    	return querySTring; // Text is the first word itself.
+	    	return querySTring.trim(); // Text is the first word itself.
 	    }
 	}
 

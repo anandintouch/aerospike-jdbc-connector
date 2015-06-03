@@ -35,11 +35,12 @@ public class Utility {
     
     
     protected static final String HOST_REQUIRED = "A 'host' name is required to establish a Connection";
-    protected static final String HOST_IN_URL = "Connection url must specify a host, e.g., jdbc:aerospike://localhost:9170/Keyspace1";
+    protected static final String HOST_IN_URL = "Connection url must specify a host, e.g., jdbc:aerospike://localhost:3000/Namespace";
     protected static final String NOT_SUPPORTED = "Aerospike implementation does not support this method";
     protected static final String CLOSED_CONN = "Method was called on a closed Connection";
     protected static final String CLOSED_STMT = "Method was called on a closed Statement";
-    protected static final String NO_RESULTSET = "No ResultSet returned from the CQL statement passed in an 'executeQuery()' method";
+    protected static final String NO_RESULTSET = "No ResultSet returned from the AQL statement passed in an 'executeQuery()' method";
+    protected static final String NO_INFORESULT = "No Result returned from the asinfo statement passed in an 'executeInfo()' method";
     protected static final String BAD_HOLD_RESULTSET = "Argument for result set holdability : %s is not a valid value";
     protected static final String BAD_TYPE_RESULTSET = "Argument for result set type : %s is not a valid value";
     protected static final String BAD_FETCH_DIR = "Fetch direction value of : %s is illegal";
@@ -158,7 +159,7 @@ public class Utility {
 //               String[] option = query.split("=");
 //               if (!option[0].equalsIgnoreCase("version")) throw new SQLNonTransientConnectionException(NOT_OPTION);
 //               if (option.length!=2) throw new SQLNonTransientConnectionException(NOT_OPTION);
-//               props.setProperty(TAG_CQL_VERSION, option[1]);
+//               props.setProperty(TAG_AQL_VERSION, option[1]);
             }
         }
 
@@ -191,17 +192,17 @@ public class Utility {
     public static String determineCurrentNamespace(String aql, String currNamespace)
     {
         String ns = currNamespace;
-        /*Matcher isKeyspace = KEYSPACE_PATTERN.matcher(cql);
-        if (isKeyspace.matches()) ks = isKeyspace.group(1);*/
+        /*Matcher isKeyspace = NAMESPACE_PATTERN.matcher(aql);
+        if (currNamespace.matches()) ns = currNamespace.group(1);*/
         return ns;
     }
     
     public static String determineCurrentBin(String aql)
     {
         String bin = null;
-        Matcher isKeyspace = SELECT_BIN_PATTERN.matcher(aql);
-        if (isKeyspace.matches())
-        	bin = isKeyspace.group(1);
+        Matcher isNamespace = SELECT_BIN_PATTERN.matcher(aql);
+        if (isNamespace.matches())
+        	bin = isNamespace.group(1);
         return bin;
     }
 }

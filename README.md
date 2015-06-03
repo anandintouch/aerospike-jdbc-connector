@@ -9,7 +9,7 @@ Clone the GitHub repository to your local file system with :
 
  git clone https://github.com/anandintouch/aerospike-jdbc-connector.git
 
-Execute the following command from the rood directory of the project:
+Execute the following command from the root directory of the project:
 
  mvn clean package
 
@@ -21,12 +21,14 @@ Example to Run:
   (aerospike-jdbc-connector-1.0.0-SNAPSHOT-jar-with-dependencies.jar) in the build path
 * Create a database connection object using DriverManager by providing DB URL as below -
    String DB_URL = jdbc:aerospike://localhost:3000/test
+   
    java.sql.Connection con = DriverManager.getConnection(DB_URL);
 * Perform your CRUD operation
 
 
 Sample application Example:
 - Create a new class and have DB connection method to create DB connection instance.
+	
 	public static void main(String[] args) {
 		
 		AerospikeJDBCTest test = new AerospikeJDBCTest();
@@ -46,8 +48,11 @@ Sample application Example:
 - Method samples as below
 
 1.
+
  	public void testDBCOnnection(){
+		
 		try {
+			
 			Class.forName("com.aerospike.jdbc.AerospikeDriver");
 		
 			 String DB_URL = String.format("jdbc:aerospike://%s:%d/%s",HOST,PORT,NAMESPACE);
@@ -72,7 +77,8 @@ Sample application Example:
 	
 2.
 
-   public void testInertQuery() throws Exception
+  	public void testInertQuery() throws Exception
+    
     {
 	   System.out.println("Insert Query..");
 	   String insert = "INSERT INTO aeroset (PK,name,city) VALUES(1,'AP','San Jose')";
@@ -84,6 +90,7 @@ Sample application Example:
        System.out.println("\n");
     }
 3.
+      
       public void testSelectWithWhere() throws Exception{
 
 	   System.out.println("Select with Where Query..");
@@ -99,8 +106,10 @@ Sample application Example:
    }
 
 4.
+   
    public void testDelete() throws Exception
    {
+   
 	   Statement statement = con.createStatement();
 	   String delete = "Delete from aeroset where PK=1";
 	   boolean result = statement.execute(delete);
