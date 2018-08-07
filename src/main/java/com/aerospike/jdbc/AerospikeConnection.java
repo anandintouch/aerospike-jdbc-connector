@@ -439,7 +439,7 @@ public class AerospikeConnection extends AbstractConnection implements Connectio
 					statement.setFilters(Filter.equal(whereArray[0].trim(),whereArray[1].replace("'", "").trim()));
 				}else{
 					createIndex(pSelect,whereArray,"NUMERIC");
-					statement.setFilters(Filter.equal(whereArray[0].trim(),whereArray[1].trim()));
+					statement.setFilters(Filter.equal(whereArray[0].trim(),Long.parseLong(whereArray[1].trim())));
 				}
 	
 			}
